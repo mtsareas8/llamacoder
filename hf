@@ -1,0 +1,111 @@
+Aqui está o script completo que cria uma CLI para interagir com modelos do Hugging Face usando LlamaCoder:
+
+### Estrutura do Projeto:
+1. `cli.py` - Definição da CLI usando `argparse`.
+2. `models.py` - Interage com os modelos Hugging Face.
+3. `main.py` - Ponto de entrada e integração entre a CLI e o modelo.
+
+### 1. `cli.py`
+Este arquivo define a CLI e coleta os argumentos.
+
+```python
+import argparse
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="CLI para interagir com modelos Hugging Face.")
+    parser.add_argument(
+        "--model",
+        type=str,
+        required=True,
+        help="Nome do modelo Hugging Face (ex.: 'gpt2', 'bert-base-uncased')."
+    )
+    parser.add_argument(
+        "--task",
+        type=str,
+        default="text-generation",
+        help="Tarefa do modelo (ex.: 'text-generation', 'sentiment-analysis')."
+    )
+    parser.add_argument(
+        "--input",
+        type=str,
+        required=True,
+        help="Texto de entrada para o modelo."
+    )
+    parser.add_argument(
+        "--max_length",
+        type=int,
+        default=50,
+        help="Comprimento máximo do texto gerado (aplicável para tarefas de geração)."
+    )
+    return parser.parse_args()
+```
+
+### 2. `models.py`
+Este arquivo carrega o modelo e executa a tarefa correspondente.
+
+```python
+from transformers import pipeline
+
+def load_model(task, model_name):
+    """
+    Carrega o modelo Hugging Face e o pipeline correspondente.
+    """
+    try:
+        return pipeline(task=task, model=model_name)
+    except Exception as e:
+        raise ValueError(f"Erro ao carregar o modelo ou pipeline: {e}")
+
+def execute_model(pipeline_model, input_text, max_length=50):
+    """
+    Executa o pipeline do modelo com os parâmetros fornecidos.
+    """
+    try:
+        return pipeline_model(input_text, max_length=max_length)
+    except Exception as e:
+        raise ValueError(f"Erro ao executar o modelo: {e}")
+```
+
+### 3. `main.py`
+Ponto de entrada onde a CLI e a lógica de execução do modelo são integradas.
+
+```python
+from cli import parse_arguments
+from models import load_model, execute_model
+
+def main():
+    # Parse dos argumentos
+    args = parse_arguments()
+
+    # Carrega o modelo
+    try:
+        model_pipeline = load_model(task=args.task, model_name=args.model)
+    except ValueError as e:
+        print(f"Erro: {e}")
+        return
+
+    # Executa o modelo
+    try:
+        result = execute_model(model_pipeline, args.input, max_length=args.max_length)
+        print("Resultado:")
+        print(result)
+    except ValueError as e:
+        print(f"Erro: {e}")
+
+if __name__ == "__main__":
+    main()
+```
+
+### Como Usar:
+1. Salve cada bloco de código em seus respectivos arquivos (`cli.py`, `models.py`, `main.py`).
+2. No terminal, execute o seguinte comando para rodar a CLI:
+
+```bash
+python main.py --model gpt2 --task text-generation --input "Hoje o dia está bonito" --max_length 100
+```
+
+### Funcionalidades Avançadas:
+- **Geração de código para novos modelos**: Você pode automatizar o carregamento de configurações específicas para novos modelos.
+- **Suporte para múltiplas tarefas**: A CLI suporta tarefas como `text-generation`, `sentiment-analysis` e outras. Basta alterar o argumento `--task`.
+- **Testes automatizados**: Adicione testes usando frameworks como `unittest` ou `pytest` para garantir que a CLI funcione corretamente.
+
+Esse script organiza o código de maneira modular, permitindo fácil manutenção e expansão, utilizando o LlamaCoder e a biblioteca `transformers`. Se precisar de mais ajuda ou ajustes, sinta-se à vontade para perguntar! 😊
